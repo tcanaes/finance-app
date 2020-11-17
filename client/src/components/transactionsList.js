@@ -1,6 +1,10 @@
 import React from 'react';
 
-export default function TransactionsList({ transactions }) {
+export default function TransactionsList({
+  transactions,
+  deleteTransaction,
+  editTransaction,
+}) {
   return (
     <div>
       {transactions.map((transaction) => {
@@ -19,10 +23,26 @@ export default function TransactionsList({ transactions }) {
             </div>
             <div className="col s2">{transaction.value}</div>
             <div className="col s1">
-              <i class="material-icons">edit</i>
+              <i
+                style={{ cursor: 'pointer' }}
+                class="material-icons"
+                onClick={() => {
+                  editTransaction(transaction._id);
+                }}
+              >
+                edit
+              </i>
             </div>
             <div className="col s1">
-              <i class="material-icons">delete</i>
+              <i
+                style={{ cursor: 'pointer' }}
+                class="material-icons"
+                onClick={() => {
+                  deleteTransaction(transaction._id);
+                }}
+              >
+                delete
+              </i>
             </div>
           </div>
         );

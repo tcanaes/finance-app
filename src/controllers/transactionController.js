@@ -84,16 +84,23 @@ const deleteTransaction = async (req, res, next) => {
 };
 
 const createTransaction = async (req, res, next) => {
-  const { description, value, category, year, month, day, type } = req.body;
+  const { description, value, category, yearMonthDay, type } = req.body;
+  const year = yearMonthDay.substring(0, 4);
+  const month = yearMonthDay.substring(5, 7);
+  const day = yearMonthDay.substring(8, 10);
+
   const newTransactionData = {
     description,
     value,
     category,
+    //yearMonthDay,
     year,
     month,
     day,
+    //yearMonth: `${year}-${month}`,
     type,
   };
+  console.log(newTransactionData);
   try {
     const newTransaction = await Transaction.create(newTransactionData);
     res.status(200).json({
@@ -109,24 +116,20 @@ const createTransaction = async (req, res, next) => {
 };
 
 const updateTransaction = async (req, res, next) => {
-  const {
-    _id,
-    description,
-    value,
-    category,
-    year,
-    month,
-    day,
-    type,
-  } = req.body;
+  const { _id, description, value, category, yearMonthDay, type } = req.body;
+  const year = yearMonthDay.substring(0, 4);
+  const month = yearMonthDay.substring(5, 7);
+  const day = yearMonthDay.substring(8, 10);
 
   const updTransactionData = {
     description,
     value,
     category,
+    yearMonthDay,
     year,
     month,
     day,
+    yearMonth: `${year}-${month}`,
     type,
   };
   try {
@@ -155,7 +158,6 @@ const savedPeriods = async (req, res, next) => {
       .json({ results: allTransactions.length, data: allTransactions });
     return;
   }
-
   next();
 };
 

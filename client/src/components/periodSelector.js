@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import M from 'materialize-css';
 //import Select from 'react-select';
 
 export default function PeriodSelector({
@@ -6,6 +7,10 @@ export default function PeriodSelector({
   setPeriod,
   currentPeriod,
 }) {
+  useEffect(() => {
+    M.AutoInit();
+  }, []);
+
   const newPeriodSelected = async (res) => {
     setPeriod(res.target.value);
   };

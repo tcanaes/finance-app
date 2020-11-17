@@ -17,6 +17,9 @@ export default function TransactionsFilter({
           type="text"
           className="validate"
           placeholder="Filtro"
+          onChange={(evt) => {
+            filterTransactions(evt.target.value.toLowerCase());
+          }}
         />
       </div>
     </div>

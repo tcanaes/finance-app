@@ -14,26 +14,26 @@ export default function App() {
   const [transactions, setTransactions] = useState([]);
   const [transactionEdit, setTransactionEdit] = useState({});
   const [listedTransactions, setListedTransactions] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState('');
 
+  //Com base na data de hoje, exibe as transações do periodo atual
   const getCurrentPeriod = async () => {
     const currDate = new Date();
     let currMonth = currDate.getMonth() + 1 + '';
     const currYear = currDate.getFullYear() + '';
     if (currMonth.length < 2) currMonth = '0' + currMonth;
     const currPeriod = `${currYear}-${currMonth}`;
-    setCurrentPeriod(currPeriod);
+    if (currentPeriod !== currPeriod) setCurrentPeriod(currPeriod);
   };
 
+  //Busca todos os períodos cadastrados na API para o usuário poder selecionar
+  //na tela.
   const getSavedPeriods = async () => {
-    // console.log('getting saved periods from:');
-    // console.log(`${window.location.host}/api/v1/finance/saved-periods`);
     axios
       //.get(`${window.location.host}/api/v1/finance/saved-periods`)
       .get(`api/v1/finance/saved-periods`)
       .then((response) => {
-        console.log(response.data.data);
         if (response.data.data.length > 0) setPeriods(response.data.data);
       })
       .catch((err) => {
@@ -48,44 +48,108 @@ export default function App() {
     getCurrentPeriod();
   }, []);
 
-  useEffect(() => {
+  //Toda vez que o período mudar, busca na API as transaçoes do novo periodo
+  const selectTransactionsOnPeriod = () => {
     if (!currentPeriod) return;
     axios
       .get(`api/v1/finance?period=${currentPeriod}`)
       .then((response) => {
-        setTransactions(response.data.data);
-        setTotals(response.data.totals);
+        if (response.data.results > 0) {
+          setTransactions(response.data.data);
+          setTotals(response.data.totals);
+        } else {
+          getCurrentPeriod();
+        }
       })
       .catch((err) => {});
-  }, [currentPeriod]);
+  };
 
   useEffect(() => {
-    if (!periods) return;
-  }, [periods]);
+    selectTransactionsOnPeriod();
+  }, [currentPeriod]);
 
+  //O programa vai sempre exibir as transações filtradas, entao, quando nao
+  //tem filtro, informa TODAS
   useEffect(() => {
     filterTransactions();
   }, [transactions]);
 
+  //Atualiza o controle do periodo atual com o periodo em tela
   const setNewPeriod = async (period) => {
     setCurrentPeriod(period);
   };
 
+  //Filta as transações que irão aparecer em tela
   const filterTransactions = async (filterString = null) => {
     if (filterString === null) setListedTransactions(transactions);
-    else setListedTransactions(transactions.includes(filterString));
+    else
+      setListedTransactions(
+        transactions.filter(
+          (transaction) =>
+            transaction.description.toLowerCase().includes(filterString) ||
+            transaction.category.toLowerCase().includes(filterString)
+        )
+      );
   };
 
+  //Abre o POPUP para inserção de uma nova transação
   const addNewTransaction = async () => {
     setIsModalOpen(true);
     setModalType('NEW');
   };
 
+  //Abre o POPUP para edição de uma transação existente
+  const editTransaction = async (id) => {
+    const transaction = transactions.find(
+      (transaction) => transaction._id === id
+    );
+    if (transaction) {
+      setTransactionEdit(transaction);
+      setIsModalOpen(true);
+      setModalType('EDIT');
+    }
+  };
+
+  //Fecha a tela do POPUP
   const closeModalTransaction = async () => {
     setIsModalOpen(false);
     setModalType('');
+    setTransactionEdit({});
   };
 
+  //Exclui a transação
+  const deleteTransaction = async (id) => {
+    axios
+      .delete(`api/v1/finance/${id}`)
+      .then((res) => {
+        getSavedPeriods();
+        selectTransactionsOnPeriod();
+      })
+      .catch((err) => {});
+  };
+
+  //Salva a transacao nova/editada
+  const saveTransaction = async (transaction) => {
+    setIsModalOpen(false);
+    setModalType('');
+    setTransactionEdit({});
+
+    let result;
+    //Se tem ID, então é uma transação sendo editada.
+    try {
+      if (transaction._id) {
+        result = await axios.patch(`api/v1/finance`, transaction);
+      } else {
+        result = await axios.post(`api/v1/finance`, transaction);
+      }
+    } catch (err) {
+      console.log('Erro axios: ', err);
+    }
+    getSavedPeriods();
+    selectTransactionsOnPeriod();
+  };
+
+  //Retorna os objetos para serem renderizados em tela
   return (
     <div className="container">
       <h1>Desafio Final do Bootcamp Full Stack</h1>
@@ -100,10 +164,15 @@ export default function App() {
         filterTransactions={filterTransactions}
         addNewTransaction={addNewTransaction}
       />
-      <TransactionsList transactions={listedTransactions} />
+      <TransactionsList
+        transactions={listedTransactions}
+        deleteTransaction={deleteTransaction}
+        editTransaction={editTransaction}
+      />
       {isModalOpen && (
         <ModalTransaction
           onClose={closeModalTransaction}
+          onSave={saveTransaction}
           modalType={modalType}
           transaction={transactionEdit}
         />
