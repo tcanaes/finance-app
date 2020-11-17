@@ -7,7 +7,14 @@
   "scripts": {
     "db:reset": "node -r dotenv/config ./dev-data/import-script.js",
     "dev": "nodemon -r dotenv/config ./src/server.js",
+    "start": "node ./src/server.js",
     "heroku-postbuild": "cd client && npm install && npm run build"
+  },
+  "nodemonConfig": {
+    "ignore": ["client/"]
+  },
+  "engines": {
+    "node": "14.15.0"
   },
   "author": "Thiago Canaes",
   "license": "ISC",

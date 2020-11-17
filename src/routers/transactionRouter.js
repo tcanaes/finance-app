@@ -10,6 +10,10 @@ transactionRouter
   .post(transactionController.createTransaction);
 
 transactionRouter
+  .route('/saved-periods')
+  .get(transactionController.savedPeriods);
+
+transactionRouter
   .route('/:id')
   .get(transactionController.getTransaction)
   .delete(transactionController.deleteTransaction);

@@ -1,7 +1,7 @@
 import dbConnection from './setup/db.js'; //Inicia banco de dados
 import app from './app.js';
 
-const { PORT } = process.env || 8081;
+const { PORT } = process.env || 3001;
 
 let server;
 
