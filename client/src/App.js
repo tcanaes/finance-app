@@ -84,10 +84,8 @@ export default function App() {
     if (filterString === null) setListedTransactions(transactions);
     else
       setListedTransactions(
-        transactions.filter(
-          (transaction) =>
-            transaction.description.toLowerCase().includes(filterString) ||
-            transaction.category.toLowerCase().includes(filterString)
+        transactions.filter((transaction) =>
+          transaction.description.toLowerCase().includes(filterString)
         )
       );
   };
