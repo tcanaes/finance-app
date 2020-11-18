@@ -91,7 +91,7 @@ const createTransaction = async (req, res, next) => {
 
   const newTransactionData = {
     description,
-    value,
+    value: value * 1,
     category,
     //yearMonthDay,
     year,
@@ -123,7 +123,7 @@ const updateTransaction = async (req, res, next) => {
 
   const updTransactionData = {
     description,
-    value,
+    value: value * 1,
     category,
     yearMonthDay,
     year,
